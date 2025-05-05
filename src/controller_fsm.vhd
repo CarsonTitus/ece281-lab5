@@ -38,8 +38,30 @@ entity controller_fsm is
 end controller_fsm;
 
 architecture FSM of controller_fsm is
-
+    signal state : STD_LOGIC_VECTOR(3 downto 0) := "0001";
+    signal prev  : STD_LOGIC := '0';
 begin
-
+    process (i_adv, i_reset)
+    begin
+        if i_reset = '1' then
+            state <= "0001"; -- reset state
+            prev <= '0';
+        elsif i_adv = '1' AND prev = '0' then
+            if state = "0001" then 
+                state <= "0010"; -- operand 1
+            elsif state = "0010" then
+                state <= "0100"; -- operand 2
+            elsif state = "0100" then
+                state <= "1000"; -- complete the step
+            else 
+                state <= "0001"; -- reset state
+            end if;
+            prev <= '1';
+        elsif i_adv = '0' then 
+            prev <= '0';
+        end if;
+    end process;
+    
+    o_cycle <= state;
 
 end FSM;
